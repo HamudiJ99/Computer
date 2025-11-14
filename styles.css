@@ -1,0 +1,94 @@
+:root{
+  --overlay-color: rgba(255,255,255,0.08);
+  --accent: #ffd166;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font-sans);
+  color:#fff;
+  background-color:#111;
+}
+
+.hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  background-color:transparent;
+}
+
+/* Unscharfer Hintergrund */
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image: url("computer1.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) saturate(1.05) brightness(1);
+  transform: scale(1.06);
+  z-index: -2;
+}
+
+/* Container für Bild + Button */
+.image-wrap{
+  position:relative;
+  width:100%;
+  max-width:100vw;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  z-index:2; /* Bild-Container über dem ::after Overlay platzieren */
+}
+
+/* Das Bild */
+.hero__img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  pointer-events:none;
+  user-select:none;
+  transition:opacity 240ms ease;
+  opacity:1;
+  z-index:0;
+}
+
+.hero__img.fade-out{ opacity:0; }
+.hero__img.fade-in{ opacity:1; }
+
+/* Power-Button */
+.power-hotspot{
+  position:absolute;
+  top:44.6%;
+  left:39.6%;
+  width:2.2%;
+  height:2.8%;
+  border-radius:50%;
+  background: rgba(255, 0, 0, 0); /* Debug: sichtbar machen, danach entfernen */
+  border: 1px solid rgba(255, 0, 0, 0);
+  border:0;
+  padding:0;
+  cursor:pointer;
+  z-index:3; /* sicher über dem Bild und Overlay */
+}
+
+/* ...existing code... */
+
+/* Dunkler Overlay */
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:var(--overlay-color);
+  z-index:1;
+  pointer-events:none;
+}

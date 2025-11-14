@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Landscape</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <main class="hero">
+        <div class="image-wrap">
+            <img src="computer1.png" alt="Hintergrund" class="hero__img" data-off="computer1.png" data-on="computer2.png" data-state="off" />
+            <!-- Unsichtbarer Hotspot über dem roten Power-Knopf -->
+            <button class="power-hotspot" aria-label="Power" title="Power"></button>
+        </div>
+    </main>
+
+    <script>
+      (function(){
+        const img = document.querySelector('.hero__img');
+        const btn = document.querySelector('.power-hotspot');
+        const wrap = document.querySelector('.image-wrap');
+        if (!img || !btn || !wrap) return;
+
+        // Original-Bildgröße
+        const ORIGINAL_W = 736;
+        const ORIGINAL_H = 597;
+
+        // Pixel-Koordinaten / -Größe des Knopfs im Originalbild
+        const BUTTON_X = 258;
+        const BUTTON_Y = 275;
+        const BUTTON_W = 20;
+        const BUTTON_H = 20;
+
+        function updateHotspot(){
+          // Container-Größe (die Box, in der das Bild mit object-fit:contain zentriert ist)
+          const wrapRect = wrap.getBoundingClientRect();
+          const cw = wrapRect.width;
+          const ch = wrapRect.height;
+
+          // Skalierungsfaktor des sichtbaren Bildes
+          const scale = Math.min(cw / ORIGINAL_W, ch / ORIGINAL_H);
+
+          // sichtbare Bildgröße und Offset innerhalb des Containers (zentriert)
+          const dispW = ORIGINAL_W * scale;
+          const dispH = ORIGINAL_H * scale;
+          const offsetX = (cw - dispW) / 2;
+          const offsetY = (ch - dispH) / 2;
+
+          // skalierte Button-Abmessungen und Position (relativ zum Container)
+          const btnW = BUTTON_W * scale;
+          const btnH = BUTTON_H * scale;
+          const left = offsetX + (BUTTON_X * scale) - (btnW / 2);
+          const top  = offsetY + (BUTTON_Y * scale) - (btnH / 2);
+
+          btn.style.position = 'absolute';    // innerhalb .image-wrap
+          btn.style.left = Math.round(left) + 'px';
+          btn.style.top  = Math.round(top)  + 'px';
+          btn.style.width = Math.round(btnW) + 'px';
+          btn.style.height = Math.round(btnH) + 'px';
+          btn.style.transform = 'none';
+        }
+
+        // initial und bei Resize / wenn Bild (neu) geladen wird
+        window.addEventListener('resize', updateHotspot);
+        img.addEventListener('load', updateHotspot);
+        if (img.complete) updateHotspot();
+
+        // Toggle an/aus beim Klick; update wenn Bild geladen
+        btn.addEventListener('click', () => {
+          const isOn = img.dataset.state === 'on';
+          const nextSrc = isOn ? img.dataset.off : img.dataset.on;
+          const nextState = isOn ? 'off' : 'on';
+
+          img.classList.add('fade-out');
+          // warten kurz für Fade, dann src wechseln; updateHotspot wird beim 'load' ausgeführt
+          setTimeout(() => {
+            // erst src setzen, dann state (img.load -> updateHotspot)
+            img.src = nextSrc;
+            img.dataset.state = nextState;
+            img.classList.remove('fade-out');
+            img.classList.add('fade-in');
+            setTimeout(() => img.classList.remove('fade-in'), 300);
+          }, 140);
+        });
+      })();
+    </script>
+</body>
+</html>
