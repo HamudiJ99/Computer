@@ -99,8 +99,8 @@ body{
   filter:blur(6px);
 }
 
-/* Glow nur wenn Bild ausgeschaltet ist */
-.image-wrap img[data-state="off"] + .power-hotspot::before{
+/* Glow nur wenn Bild ausgeschaltet ist UND computer1 angezeigt wird */
+.image-wrap img[data-state="off"][src="computer1.png"] + .power-hotspot::before{
   animation: pulseGlow 1.4s ease-in-out infinite;
   opacity:1;
 }
@@ -139,4 +139,32 @@ body{
   animation: none !important;
   border-radius: 50% !important;
   outline: none !important;
+}
+
+/* Sound-Toggle Button */
+.sound-toggle{
+  position:fixed;
+  top:20px;
+  right:20px;
+  width:auto;
+  height:auto;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  border:none;
+  font-size:32px;
+  cursor:pointer;
+  z-index:100;
+  transition:all 200ms ease;
+  color:#ffd166;
+  text-shadow:0 0 4px rgba(0,0,0,0.5);
+}
+
+.sound-toggle:hover{
+  color:#fff;
+  transform:scale(1.1);
+}
+
+.sound-toggle:active{
+  transform:scale(0.95);
 }

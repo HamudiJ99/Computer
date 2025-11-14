@@ -7,53 +7,96 @@
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+    <!-- Audio-Element -->
+    <audio id="roomSound" loop>
+      <source src="roomSound.mp3" type="audio/mpeg" />
+    </audio>
+
+    <!-- Unsichtbarer Start-Button für Autoplay -->
+    <button id="startAudio" style="display:none;"></button>
+
+    <!-- Sound-Toggle Button oben rechts -->
+    <button id="soundToggle" class="sound-toggle" aria-label="Sound an/aus" title="Sound an/aus">
+      ♪
+    </button>
+
     <main class="hero">
         <div class="image-wrap">
             <img src="computer1.png" alt="Hintergrund" class="hero__img" data-off="computer1.png" data-on="computer2.png" data-state="off" />
-            <!-- Unsichtbarer Hotspot über dem roten Power-Knopf -->
             <button class="power-hotspot" aria-label="Power" title="Power"></button>
         </div>
     </main>
 
     <script>
+      // Autoplay Workaround
+      (function(){
+        const audio = document.getElementById('roomSound');
+        const startBtn = document.getElementById('startAudio');
+        const soundToggle = document.getElementById('soundToggle');
+
+        // Beim ersten Klick irgendwo → Audio starten
+        startBtn.click(); // triggert direkt
+
+        audio.play().then(() => {
+          console.log('Audio lädt...');
+        }).catch((err) => {
+          console.log('Autoplay blockiert:', err);
+          // Fallback: bei erstem Nutzer-Klick starten
+          document.addEventListener('click', () => {
+            audio.play();
+          }, { once: true });
+        });
+      })();
+
+      // Sound-Toggle
+      (function(){
+        const audio = document.getElementById('roomSound');
+        const btn = document.getElementById('soundToggle');
+        let isPlaying = true;
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation(); // verhindert doppeltes Triggern
+          if (isPlaying) {
+            audio.pause();
+            btn.textContent = '✕';
+            isPlaying = false;
+          } else {
+            audio.play();
+            btn.textContent = '♪';
+            isPlaying = true;
+          }
+        });
+      })();
+
+      // Power-Button (existierender Code)
       (function(){
         const img = document.querySelector('.hero__img');
         const btn = document.querySelector('.power-hotspot');
         const wrap = document.querySelector('.image-wrap');
         if (!img || !btn || !wrap) return;
 
-        // Original-Bildgröße
         const ORIGINAL_W = 736;
         const ORIGINAL_H = 597;
-
-        // Pixel-Koordinaten / -Größe des Knopfs im Originalbild
         const BUTTON_X = 260;
         const BUTTON_Y = 273;
         const BUTTON_W = 22;
         const BUTTON_H = 20;
 
         function updateHotspot(){
-          // Container-Größe (die Box, in der das Bild mit object-fit:contain zentriert ist)
           const wrapRect = wrap.getBoundingClientRect();
           const cw = wrapRect.width;
           const ch = wrapRect.height;
-
-          // Skalierungsfaktor des sichtbaren Bildes
           const scale = Math.min(cw / ORIGINAL_W, ch / ORIGINAL_H);
-
-          // sichtbare Bildgröße und Offset innerhalb des Containers (zentriert)
           const dispW = ORIGINAL_W * scale;
           const dispH = ORIGINAL_H * scale;
           const offsetX = (cw - dispW) / 2;
           const offsetY = (ch - dispH) / 2;
-
-          // skalierte Button-Abmessungen und Position (relativ zum Container)
           const btnW = BUTTON_W * scale;
           const btnH = BUTTON_H * scale;
           const left = offsetX + (BUTTON_X * scale) - (btnW / 2);
           const top  = offsetY + (BUTTON_Y * scale) - (btnH / 2);
 
-          btn.style.position = 'absolute';    // innerhalb .image-wrap
+          btn.style.position = 'absolute';
           btn.style.left = Math.round(left) + 'px';
           btn.style.top  = Math.round(top)  + 'px';
           btn.style.width = Math.round(btnW) + 'px';
@@ -61,27 +104,35 @@
           btn.style.transform = 'none';
         }
 
-        // initial und bei Resize / wenn Bild (neu) geladen wird
         window.addEventListener('resize', updateHotspot);
         img.addEventListener('load', updateHotspot);
         if (img.complete) updateHotspot();
 
-        // Toggle an/aus beim Klick; update wenn Bild geladen
         btn.addEventListener('click', () => {
           const isOn = img.dataset.state === 'on';
-          const nextSrc = isOn ? img.dataset.off : img.dataset.on;
-          const nextState = isOn ? 'off' : 'on';
+          
+          if (isOn) {
+            img.src = 'computer1.png';
+            img.dataset.state = 'off';
+          } else {
+            const bootSequence = ['computer2.png', 'computer3.png', 'computer4.jpeg', 'computer5.png', 'computer6.png', 'computer3.png'];
+            let step = 0;
 
-          img.classList.add('fade-out');
-          // warten kurz für Fade, dann src wechseln; updateHotspot wird beim 'load' ausgeführt
-          setTimeout(() => {
-            // erst src setzen, dann state (img.load -> updateHotspot)
-            img.src = nextSrc;
-            img.dataset.state = nextState;
-            img.classList.remove('fade-out');
-            img.classList.add('fade-in');
-            setTimeout(() => img.classList.remove('fade-in'), 300);
-          }, 140);
+            function showNextFrame(){
+              setTimeout(() => {
+                img.src = bootSequence[step];
+                step++;
+                if (step < bootSequence.length) {
+                  const delay = (step >= 2 && step <= 4) ? 800 : 1600;
+                  setTimeout(showNextFrame, delay);
+                } else {
+                  img.dataset.state = 'on';
+                }
+              }, 0);
+            }
+
+            showNextFrame();
+          }
         });
       })();
     </script>
