@@ -65,30 +65,78 @@ body{
 .hero__img.fade-out{ opacity:0; }
 .hero__img.fade-in{ opacity:1; }
 
-/* Power-Button */
+/* Power-Button (unsichtbar, Größe/Position steuert JS) */
 .power-hotspot{
   position:absolute;
-  top:44.6%;
-  left:39.6%;
-  width:2.2%;
-  height:2.8%;
   border-radius:50%;
-  background: rgba(255, 0, 0, 0); /* Debug: sichtbar machen, danach entfernen */
-  border: 1px solid rgba(255, 0, 0, 0);
+  background:transparent;
   border:0;
   padding:0;
   cursor:pointer;
-  z-index:3; /* sicher über dem Bild und Overlay */
+  z-index:3;
+  transition: transform 180ms ease;
+  pointer-events:auto;
 }
 
-/* ...existing code... */
+/* entferne den inneren roten Punkt */
+.power-hotspot::after{
+  display:none;
+}
 
-/* Dunkler Overlay */
-.hero::after{
+/* sanfter, zentrierter Glow (anstatt Umriss/Border) */
+.power-hotspot::before{
   content:"";
   position:absolute;
-  inset:0;
-  background:var(--overlay-color);
-  z-index:1;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(0.9);
+  width:120%;
+  height:120%;
+  border-radius:50%;
   pointer-events:none;
+  background: radial-gradient(circle at center, rgba(255,60,60,0.55) 0%, rgba(255,60,60,0.25) 30%, rgba(255,60,60,0) 60%);
+  opacity:0;
+  filter:blur(6px);
+}
+
+/* Glow nur wenn Bild ausgeschaltet ist */
+.image-wrap img[data-state="off"] + .power-hotspot::before{
+  animation: pulseGlow 1.4s ease-in-out infinite;
+  opacity:1;
+}
+
+@keyframes pulseGlow{
+  0%   { transform:translate(-50%,-50%) scale(0.9);  opacity:0.9; }
+  50%  { transform:translate(-50%,-50%) scale(1.15); opacity:0.35; }
+  100% { transform:translate(-50%,-50%) scale(0.9);  opacity:0.9; }
+}
+
+/* wenn Bild AUS -> zeige Punkt + Pulse */
+.image-wrap img[data-state="off"] + .power-hotspot::after{
+  opacity:1;
+}
+.image-wrap img[data-state="off"] + .power-hotspot::before{
+  animation:powerPulse 1.4s infinite;
+}
+
+/* dezente Pulse-Animation */
+@keyframes powerPulse{
+  0%   { box-shadow:0 0 0 0 rgba(255,60,60,0.22); }
+  50%  { box-shadow:0 0 20px 10px rgba(255,60,60,0.08); }
+  100% { box-shadow:0 0 0 0 rgba(255,60,60,0); }
+}
+
+/* Fokus sichtbar machen (Zugänglichkeit) */
+.power-hotspot:focus::after{
+  outline:2px solid rgba(255,255,255,0.6);
+  outline-offset:2px;
+}
+
+@keyframes blink{0%{opacity:1}50%{opacity:0.2}100%{opacity:1}} .image-wrap img[data-state="off"] + .power-hotspot{animation:blink 1s infinite}
+
+@keyframes powerPulse{0%{box-shadow:0 0 0 0 rgba(255,60,60,0.9)}50%{box-shadow:0 0 16px 8px rgba(255,60,60,0.18)}100%{box-shadow:0 0 0 0 rgba(255,60,60,0)}} .image-wrap img[data-state="off"] + .power-hotspot{animation:powerPulse 1s infinite; border-radius:50%; outline:none}
+.image-wrap img[data-state="off"] + .power-hotspot{
+  animation: none !important;
+  border-radius: 50% !important;
+  outline: none !important;
 }
